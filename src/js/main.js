@@ -1,33 +1,27 @@
-import { getParkData } from "./parkService.mjs";
+import { getParkData, getInfoLinks } from "./parkService.mjs";
+import setHeaderFooter from "./setHeaderFooter.mjs";
+import { mediaCardTemplate } from "./templates.mjs";
 
-const parkData = getParkData();
+function setParkIntro(data) {
+  const introEl = document.querySelector(".intro");
+  introEl.innerHTML = `<h1>${data.fullName}</h1>
+  <p>${data.description}</p>`;
+}
 
-// Update the link in the disclaimer area to read the name of the park and navigate to that park’s official site.
-// Update the title of the page to read the name of the park.
-// Use the first image in the list in the data for the hero image.
-// Update the name, designation, and states of the park in the hero.
+function setParkInfoLinks(data) {
+  const infoEl = document.querySelector(".info");
+  // we have multiple links to build...so we map to transform the array of objects into an array of HTML strings.
+  const html = data.map(mediaCardTemplate);
+  // join the array of strings into one string and insert it into the section
+  infoEl.insertAdjacentHTML("afterbegin", html.join(""));
+}
 
-const disclaimer = document.querySelector(".disclaimer > a");
-disclaimer.href = parkData.url;
-disclaimer.innerHTML = parkData.fullName;
+async function init() {
+  const parkData = await getParkData();
+  const links = getInfoLinks(parkData.images);
+  setHeaderFooter(parkData);
+  setParkIntro(parkData);
+  setParkInfoLinks(links);
+}
 
-function parkInfoTemplate(info) {
-    return `<a href="/" class="hero-banner__title">${info.name}</a>
-    <p class="hero-banner__subtitle">
-      <span>${info.designation}</span>
-      <span>${info.states}</span>
-    </p>`;
-  }
-
-const parkImage = document.querySelector(".park-img");
-parkImage.src = parkData.images[0]["url"];
-parkImage.alt = parkData.images[0]["altText"];
-
-const parkTitle = document.querySelector(".caption-title");
-parkTitle.innerHTML = parkData.name;
-
-const parkDesig = document.querySelector(".caption-desig");
-parkDesig.innerHTML = parkData.designation;
-
-const parkStates = document.querySelector(".caption-states");
-parkStates.innerHTML = parkData.states;
+init();
